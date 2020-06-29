@@ -37,6 +37,8 @@ mex_bra_usa_can <- c( "BRA", "CAN", "USA", "MEX")
 
 mex_usa_can <- c( "CAN", "USA", "MEX")
 
+mex_bra_usa_can_uk <- c( "BRA", "CAN", "USA", "MEX", "GBR")
+
 ## filtering by country ----
 
 owid_gbr <- filter(owid, iso_code == "GBR")
@@ -55,19 +57,21 @@ owid_mex_bra_usa_can <- filter(owid, iso_code %in% mex_bra_usa_can)
 
 owid_mex_usa_can <- filter(owid, iso_code %in% mex_usa_can)
 
+owid_mex_bra_usa_can_uk <- filter(owid, iso_code %in% mex_bra_usa_can_uk)
+
 
 ## filtering by date ----
 
 date_v <- seq(as.Date("2020-03-01"), as.Date("2020-06-29"), by = "days") %>% as.character() #need as.charactor %in% to work
 
 ## date range filter ----
-date_range <- filter(owid_mex_bra_usa_can, date %in% date_v)
+date_range <- filter(owid_mex_bra_usa_can_uk, date %in% date_v)
 date_range <- mutate(date_range, Date = as.Date(date)) #then back to date format
 
 
-##plot new deaths or cases per million in the countries selected at date range filter ----
+##plot new deaths per million in the countries selected at date range filter ----
 ggplot(date_range) +
-  stat_smooth(mapping = aes(x = Date, y = new_deaths_per_million, group = iso_code, colour = iso_code), span= 0.7, show.legend = TRUE) +
+  stat_smooth(mapping = aes(x = Date, y = new_deaths_per_million, group = iso_code, colour = iso_code), span= 0.5, show.legend = TRUE) +
   geom_point(mapping =  aes(x = Date, y = new_deaths_per_million, colour = iso_code, shape = iso_code), show.legend = TRUE) +
   theme_bw() +
   scale_x_date(NULL,
@@ -76,9 +80,29 @@ ggplot(date_range) +
   #scale_y_continuous(name = "new cases per million", breaks = seq(0, 25, by = 5)) +
   ylim(0, 10) +
   ylab("new deaths per million") +
-  labs (title = "Covid-19 new cases per million in Brazil, Canada, Mexico and USA",
+  labs (title = "Covid-19 new deaths per million in Brazil, Canada, Mexico, UK and USA",
         subtitle = "Source: Our World in Data  (https://github.com/owid/covid-19-data/tree/master/public/data)",
-        caption = "March 1st to June 29th 2020 https://github.com/LordGenome/our_world_in_data")
+        caption = "March 1st to June 29th 2020 https://github.com/LordGenome/our_world_in_data") +
+  ggsave("images/new_deaths_per_million.png")
+
+
+##plot new cases per million in the countries selected at date range filter ----
+ggplot(date_range) +
+  stat_smooth(mapping = aes(x = Date, y = new_cases_per_million, group = iso_code, colour = iso_code), span= 0.5, show.legend = TRUE) +
+  geom_point(mapping =  aes(x = Date, y = new_cases_per_million, colour = iso_code, shape = iso_code), show.legend = TRUE) +
+  theme_bw() +
+  scale_x_date(NULL,
+               breaks = scales::breaks_width("1 week"),
+               labels = scales::label_date_short()) +
+  #scale_y_continuous(name = "new cases per million", breaks = seq(0, 25, by = 5)) +
+  ylim(0, 200) +
+  ylab("new cases per million") +
+  labs (title = "Covid-19 new cases per million in Brazil, Canada, Mexico, UK and USA",
+        subtitle = "Source: Our World in Data  (https://github.com/owid/covid-19-data/tree/master/public/data)",
+        caption = "March 1st to June 29th 2020 https://github.com/LordGenome/our_world_in_data") +
+  ggsave("images/new_cases_per_million.png")
+
+
 
 
 ##plot new deaths and cases per million in the countries selected at date range filter ----
