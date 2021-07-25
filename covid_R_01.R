@@ -62,18 +62,23 @@ owid_mex_bra_usa_can_uk <- filter(owid, iso_code %in% mex_bra_usa_can_uk)
 
 ## filtering by date ----
 
-sdate <- Sys.Date()
+sys_date <- Sys.Date()
+start_date <- as.Date("2020-03-01")
+label_start_date <- format(start_date, "%d %b")
+label_sys_date <- format(sys_date, "%d %b")
+label_dates <- paste0(label_start_date," to ",label_sys_date, " https://github.com/LordGenome/our_world_in_data")
 
-date_v <- seq(as.Date("2020-03-01"), as.Date(sdate), by = "days") %>% as.character() #need as.charactor %in% to work
+
+date_v <- seq(as.Date("2020-03-01"), as.Date(sys_date), by = "days") %>% as.character() #need as.charactor %in% to work
 
 ## date range filter ----
 date_range <- filter(owid_mex_bra_usa_can_uk, date %in% date_v)
 date_range <- mutate(date_range, Date = as.Date(date)) #then back to date format
-image_name <- paste("images/deaths_mex_bra_usa_can_uk_",sdate, ".png", sep="")
+image_name <- paste("images/deaths_mex_bra_usa_can_uk_",sys_date, ".png", sep="")
 
 
 ##plot new deaths per million in the countries selected at date range filter ----
-image_name <- paste("images/deaths_mex_bra_usa_can_uk_",sdate, ".png", sep="")
+image_name <- paste("images/deaths_mex_bra_usa_can_uk_",sys_date, ".png", sep="")
 ggplot(date_range) +
   stat_smooth(mapping = aes(x = Date, y = new_deaths_per_million, group = iso_code, colour = iso_code), span= 0.5, show.legend = TRUE) +
   #geom_point(mapping =  aes(x = Date, y = new_deaths_per_million, colour = iso_code, shape = iso_code), show.legend = TRUE) +
@@ -86,12 +91,12 @@ ggplot(date_range) +
   ylab("new deaths per million") +
   labs (title = "Covid-19 new deaths per million in Brazil, Canada, Mexico, UK and USA",
         subtitle = "Source: Our World in Data  (https://github.com/owid/covid-19-data/tree/master/public/data)",
-        caption = "March 1st to June 29th 2020 https://github.com/LordGenome/our_world_in_data") +
+        caption = label_dates) +
   ggsave(image_name)
 
 
 ##plot new cases per million in the countries selected at date range filter ----
-image_name <- paste("images/cases_mex_bra_usa_can_uk_",sdate, ".png", sep="")
+image_name <- paste("images/cases_mex_bra_usa_can_uk_",sys_date, ".png", sep="")
 ggplot(date_range) +
   stat_smooth(mapping = aes(x = Date, y = new_cases_per_million, group = iso_code, colour = iso_code), span= 0.5, show.legend = TRUE) +
   #geom_point(mapping =  aes(x = Date, y = new_cases_per_million, colour = iso_code, shape = iso_code), show.legend = TRUE) +
@@ -100,13 +105,12 @@ ggplot(date_range) +
                breaks = scales::breaks_width("1 week"),
                labels = scales::label_date_short()) +
   #scale_y_continuous(name = "new cases per million", breaks = seq(0, 25, by = 5)) +
-  ylim(0, 200) +
+  ylim(0, 250) +
   ylab("new cases per million") +
   labs (title = "Covid-19 new cases per million in Brazil, Canada, Mexico, UK and USA",
         subtitle = "Source: Our World in Data  (https://github.com/owid/covid-19-data/tree/master/public/data)",
-        caption = "March 1st to June 30th 2020 https://github.com/LordGenome/our_world_in_data") +
+        caption = label_dates) +
   ggsave(image_name)
-
 
 
 
@@ -125,7 +129,7 @@ ggplot(date_range) +
   ylab("new cases per million") +
   labs (title = "Covid-19 new deaths per million in Brazil, Canada, Mexico & USA",
         subtitle = "Source: Our World in Data  (https://github.com/owid/covid-19-data/tree/master/public/data)",
-        caption = "March 1st to June 28th 2020 https://github.com/LordGenome/our_world_in_data")
+        caption = label_dates)
 
 
 
@@ -137,23 +141,76 @@ ggplot(date_range) +
 #  scale_y_continuous(name = "new cases per million", breaks = seq(0, 150, by = 25))
 
 
-## log2 plot of deaths and cases ---
+## log2 plot of deaths and cases ----
+image_name <- paste("images/log2_mex_bra_usa_can_uk_",sys_date, ".png", sep="")
 
 ggplot(date_range) +
   geom_smooth(mapping = aes(x = Date, y = log2tcpm, group = iso_code, colour = iso_code), 
-            linetype = "solid", se = TRUE, span= 0.5, show.legend = TRUE) +
+            linetype = "solid", se = TRUE, span= 0.2, show.legend = TRUE) +
   #geom_point(mapping =  aes(x = Date, y = log2tcpm, shape = iso_code, colour = iso_code), show.legend = TRUE) +
   stat_smooth(mapping = aes(x = Date, y = log2tdpm, group = iso_code, colour = iso_code), 
-              linetype = "dashed", se = TRUE, span= 0.5, show.legend = TRUE) +
+              linetype = "dashed", se = TRUE, span= 0.2, show.legend = TRUE) +
   #geom_point(mapping =  aes(x = Date, y = log2tdpm, shape = iso_code, colour = iso_code), show.legend = TRUE) +
   theme_bw() +
   scale_x_date(NULL,
                breaks = scales::breaks_width("1 week"),
                labels = scales::label_date_short()) +
-  scale_y_continuous(name = "log2 per million", breaks = seq(-15, 15, by = 1))
+  scale_y_continuous(name = "log2 per million", breaks = seq(-15, 15, by = 1)) +
+  labs (title = "Covid-19 total cases (solid) & deaths (hatched) per million 
+        Brazil, Canada, UK, Mexico & USA",
+        subtitle = "Source: Our World in Data  (https://github.com/owid/covid-19-data/tree/master/public/data)",
+        caption = label_dates) +
+  ggsave(image_name)
+
+## linear plot of cases ----
+image_name <- paste("images/linear_mex_bra_usa_can_uk_",sys_date, ".png", sep="")
+
+ggplot(date_range) +
+  geom_smooth(mapping = aes(x = Date, y = total_cases_per_million, group = iso_code, colour = iso_code), 
+              linetype = "solid", se = TRUE, span= 0.5, show.legend = TRUE) +
+  #geom_point(mapping =  aes(x = Date, y = y = total_cases_per_million, shape = iso_code, colour = iso_code), show.legend = TRUE) +
+  #stat_smooth(mapping = aes(x = Date, y = log2tdpm, group = iso_code, colour = iso_code), 
+             #linetype = "dashed", se = TRUE, span= 0.2, show.legend = TRUE) +
+  #geom_point(mapping =  aes(x = Date, y = log2tdpm, shape = iso_code, colour = iso_code), show.legend = TRUE) +
+  theme_bw() +
+ scale_x_date(NULL,
+             breaks = scales::breaks_width("1 week"),
+              labels = scales::label_date_short()) +
+ scale_y_continuous(name = "total cases per million", breaks = seq(0, 15000, by = 1000)) +
+labs (title = "Covid-19 total cases per million 
+      Brazil, Canada, UK, Mexico & USA",
+     subtitle = "Source: Our World in Data  (https://github.com/owid/covid-19-data/tree/master/public/data)",
+      caption = label_dates) +
+  ggsave(image_name)
+
+## linear plot of deaths ----
+image_name <- paste("images/linear_mex_bra_usa_can_uk_",sys_date, ".png", sep="")
+
+
+ggplot(date_range) +
+  #geom_smooth(mapping = aes(x = Date, y = total_cases_per_million, group = iso_code, colour = iso_code), 
+   #           linetype = "solid", se = TRUE, span= 0.5, show.legend = TRUE) +
+  #geom_point(mapping =  aes(x = Date, y = y = total_cases_per_million, shape = iso_code, colour = iso_code), show.legend = TRUE) +
+  stat_smooth(mapping = aes(x = Date, y = total_deaths_per_million, group = iso_code, colour = iso_code), 
+  linetype = "dashed", se = TRUE, span= 0.2, show.legend = TRUE) +
+  #geom_point(mapping =  aes(x = Date, y = log2tdpm, shape = iso_code, colour = iso_code), show.legend = TRUE) +
+  theme_bw() +
+  scale_x_date(NULL,
+               breaks = scales::breaks_width("1 week"),
+               labels = scales::label_date_short()) +
+  scale_y_continuous(name = "total deaths per million", breaks = seq(0, 15000, by = 100)) +
+  labs (title = "Covid-19 total deaths per million 
+      Brazil, Canada, UK, Mexico & USA",
+        subtitle = "Source: Our World in Data  (https://github.com/owid/covid-19-data/tree/master/public/data)",
+        caption = label_dates) +
+  ggsave(image_name)
+
+
+
+
 
 ##filtering by specific date ----
-owid_one_date <- filter(owid, date == "2020-06-20")
+owid_one_date <- filter(owid, date == "2020-07-05")
 owid_one_date <- mutate(owid_one_date, lethality = (100*total_deaths_per_million/total_cases_per_million))
 owid_one_date <- filter(owid_one_date, lethality > 0)
 
@@ -164,7 +221,8 @@ ggplot(owid_one_date) +
   geom_smooth(method = "glm", mapping = aes(x = life_expectancy, y = log2(total_cases_per_million)), colour = "orange", show.legend = FALSE) +
     theme_bw() +
   scale_y_continuous(name = "log2 per million", breaks = seq(-5, 15, by = 1)) +
-  scale_x_continuous(name = "life expectancy", breaks = seq(50, 100, by = 1))
+  scale_x_continuous(name = "life expectancy", breaks = seq(50, 100, by = 1)) +
+  ggsave(image_name)
 
 #output x interecpt and gradient co-efficients
 fit <- lm(owid_one_date$life_expectancy, log2(owid_one_date$total_cases_per_million))
